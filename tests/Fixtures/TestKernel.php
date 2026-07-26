@@ -59,8 +59,9 @@ final class TestKernel extends Kernel
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
-        // A probe endpoint that issues a real Mongo read, so a functional test has something
-        // to profile; Task 8's explain test drives the explain endpoint off its token.
+        // A probe endpoint that issues real Mongo commands, so a functional test has
+        // something to profile; Task 8's explain test drives the explain endpoint off its
+        // token, targeting the find at index 0 (explainable) or the insert at index 1 (not).
         $routes->add('_test_probe', '/_probe')->controller([self::class, 'probe']);
 
         if ($this->importRoutes) {
@@ -73,11 +74,12 @@ final class TestKernel extends Kernel
         $uri = (string) getenv('MONGODB_URI');
         $database = (string) (getenv('MONGODB_DATABASE') ?: 'mongodb_profiler_test');
 
-        (new \MongoDB\Client($uri))
+        $collection = (new \MongoDB\Client($uri))
             ->selectDatabase($database)
-            ->selectCollection('profiler_probe')
-            ->find(['probe' => 1])
-            ->toArray();
+            ->selectCollection('profiler_probe');
+
+        $collection->find(['probe' => 1])->toArray();
+        $collection->insertOne(['probe' => 1]);
 
         return new Response('ok');
     }

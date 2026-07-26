@@ -43,9 +43,12 @@ final class ConfigurationTest extends BundleTestCase
     {
         // `explain.uri`/`explain.database` default to null, so `config/explain.php` must
         // never be imported — proving the conditional import in loadExtension() actually
-        // guards the container, not only that its condition reads correctly.
+        // guards the container, not only that its condition reads correctly. Asserted against
+        // the (necessarily public) explain controller rather than the runner: the runner is
+        // private and, once referenced only by the controller, would otherwise be a moving
+        // target under compiler passes.
         self::bootKernel();
 
-        self::assertFalse(self::getContainer()->has('mongodb_profiler.explain_runner'));
+        self::assertFalse(self::getContainer()->has('mongodb_profiler.explain_controller'));
     }
 }

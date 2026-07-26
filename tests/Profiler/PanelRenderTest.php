@@ -42,7 +42,7 @@ final class PanelRenderTest extends BundleTestCase
             'explain' => ['uri' => $uri, 'database' => 'mongodb_profiler_test'],
         ], 'routes' => true]);
 
-        self::assertTrue(self::getContainer()->has('mongodb_profiler.explain_runner'));
+        self::assertTrue(self::getContainer()->has('mongodb_profiler.explain_controller'));
 
         $html = $this->renderPanel();
 
@@ -66,7 +66,7 @@ final class PanelRenderTest extends BundleTestCase
             'explain' => ['uri' => $uri, 'database' => 'mongodb_profiler_test'],
         ], 'routes' => false]);
 
-        self::assertTrue(self::getContainer()->has('mongodb_profiler.explain_runner'));
+        self::assertTrue(self::getContainer()->has('mongodb_profiler.explain_controller'));
 
         $html = $this->renderPanel();
 

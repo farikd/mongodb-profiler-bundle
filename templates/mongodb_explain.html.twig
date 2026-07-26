@@ -1,0 +1,14 @@
+{% if error is defined %}
+    <span style="color: var(--color-error);">&#9888; {{ error }}</span>
+{% else %}
+    <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; background: rgba(0, 0, 0, 0.04);">
+        {% if result.usesIndex %}
+            <strong style="color: #2e7d32;">&#10003; IXSCAN</strong>{% if result.indexName %} <code>{{ result.indexName }}</code>{% endif %}
+        {% elseif result.planType == 'COLLSCAN' %}
+            <strong style="color: var(--color-error);">&#9888; COLLSCAN</strong> <span class="text-muted">(no index used)</span>
+        {% else %}
+            <strong>{{ result.planType }}</strong>
+        {% endif %}
+        <span class="text-muted">&middot; docs examined <strong>{{ result.docsExamined }}</strong> &middot; returned <strong>{{ result.nReturned }}</strong></span>
+    </span>
+{% endif %}
