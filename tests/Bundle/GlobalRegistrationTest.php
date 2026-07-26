@@ -61,8 +61,12 @@ final class GlobalRegistrationTest extends MongoTestCase
     {
         $first = new TestKernel(['cli' => true]);
         $first->boot();
-        $firstSubscriber = $this->subscriber($first);
-        $first->shutdown();
+
+        try {
+            $firstSubscriber = $this->subscriber($first);
+        } finally {
+            $first->shutdown();
+        }
 
         $second = new TestKernel(['cli' => true]);
         $second->boot();
