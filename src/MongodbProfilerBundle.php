@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Farikd\MongodbProfilerBundle;
 
 use Farikd\MongodbProfilerBundle\Monitoring\ProfilerSubscriber;
+
+use function MongoDB\Driver\Monitoring\addSubscriber;
+use function MongoDB\Driver\Monitoring\removeSubscriber;
+
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-use function MongoDB\Driver\Monitoring\addSubscriber;
-use function MongoDB\Driver\Monitoring\removeSubscriber;
 
 /**
  * Dev-only MongoDB query profiler.
@@ -67,10 +68,20 @@ final class MongodbProfilerBundle extends AbstractBundle
             ->end();
     }
 
+    /**
+     * @param array{
+     *     enabled: bool|null,
+     *     cli: bool,
+     *     max_queries: int,
+     *     ignored_commands: list<string>,
+     *     ignored_trace_prefixes: list<string>,
+     *     explain: array{uri: string|null, database: string|null},
+     * } $config
+     */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         $enabled = $config['enabled'] ?? (bool) $builder->getParameter('kernel.debug');
-        if ($enabled !== true) {
+        if (true !== $enabled) {
             return;
         }
 
@@ -93,7 +104,7 @@ final class MongodbProfilerBundle extends AbstractBundle
     public function boot(): void
     {
         $subscriber = $this->subscriber();
-        if ($subscriber !== null) {
+        if (null !== $subscriber) {
             addSubscriber($subscriber);
         }
     }
@@ -101,7 +112,7 @@ final class MongodbProfilerBundle extends AbstractBundle
     public function shutdown(): void
     {
         $subscriber = $this->subscriber();
-        if ($subscriber !== null) {
+        if (null !== $subscriber) {
             removeSubscriber($subscriber);
         }
     }
@@ -109,7 +120,7 @@ final class MongodbProfilerBundle extends AbstractBundle
     private function subscriber(): ?ProfilerSubscriber
     {
         // Absent whenever `enabled` is false — that is the whole point of gating registration.
-        if ($this->container === null || !$this->container->has('mongodb_profiler.subscriber')) {
+        if (null === $this->container || !$this->container->has('mongodb_profiler.subscriber')) {
             return null;
         }
 

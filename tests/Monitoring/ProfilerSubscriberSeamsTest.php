@@ -7,6 +7,9 @@ namespace Farikd\MongodbProfilerBundle\Tests\Monitoring;
 use Farikd\MongodbProfilerBundle\Monitoring\ProfilerSubscriber;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @phpstan-import-type QueryRecord from ProfilerSubscriber
+ */
 final class ProfilerSubscriberSeamsTest extends TestCase
 {
     public function testIgnoredTracePrefixesPushTheReportedFrameOutwards(): void
@@ -70,7 +73,7 @@ final class ProfilerSubscriberSeamsTest extends TestCase
         self::assertSame(0, $subscriber->getDroppedCount());
     }
 
-    /** @return array<string, mixed> */
+    /** @return QueryRecord */
     private static function record(string $commandName, string $collection, mixed $filter = ['n' => 1]): array
     {
         $frame = ['name' => 'Repo.php', 'file' => '/app/Repo.php', 'line' => 1];

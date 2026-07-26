@@ -11,7 +11,6 @@ use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 
 /**
  * The formatter is the fix for "I can't see the $match/$group args": profiler_dump cut
@@ -48,7 +47,7 @@ final class FilterFormatterTest extends TestCase
         $formatter = new FilterFormatter();
 
         // An empty document stays `{}`, an empty array stays `[]`.
-        self::assertSame('{}', $formatter->toReadable(new stdClass()));
+        self::assertSame('{}', $formatter->toReadable(new \stdClass()));
         self::assertSame('[]', $formatter->toReadable([]));
     }
 

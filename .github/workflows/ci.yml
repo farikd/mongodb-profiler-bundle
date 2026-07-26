@@ -1,0 +1,69 @@
+name: CI
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+
+jobs:
+    tests:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - php: '8.4'
+                      symfony: '7.3.*'
+                    - php: '8.4'
+                      symfony: '8.0.*'
+                    - php: '8.5'
+                      symfony: '7.3.*'
+                    - php: '8.5'
+                      symfony: '8.0.*'
+                    - php: '8.4'
+                      symfony: '7.3.*'
+                      dependencies: lowest
+        services:
+            mongo:
+                image: mongo:8
+                ports: ['27017:27017']
+        env:
+            MONGODB_URI: mongodb://127.0.0.1:27017
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php }}
+                  extensions: mongodb
+                  coverage: none
+
+            - run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
+
+            - name: Restrict Symfony version
+              run: |
+                  composer global config --no-plugins allow-plugins.symfony/flex true
+                  composer config extra.symfony.require "${{ matrix.symfony }}"
+
+            - name: Install dependencies
+              run: |
+                  if [ "${{ matrix.dependencies }}" = "lowest" ]; then
+                      composer update --prefer-lowest --prefer-stable --no-progress
+                  else
+                      composer update --no-progress
+                  fi
+
+            - run: vendor/bin/phpunit
+
+    static:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.4'
+                  extensions: mongodb
+                  coverage: none
+            - run: composer update --no-progress
+            - run: vendor/bin/phpstan analyse --no-progress
+            - run: vendor/bin/php-cs-fixer check --diff

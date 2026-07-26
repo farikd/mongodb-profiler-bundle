@@ -86,12 +86,12 @@ final class TestKernel extends Kernel
 
     public function getCacheDir(): string
     {
-        return sys_get_temp_dir() . '/mongodb-profiler-bundle/' . $this->fingerprint();
+        return sys_get_temp_dir().'/mongodb-profiler-bundle/'.$this->fingerprint();
     }
 
     public function getLogDir(): string
     {
-        return $this->getCacheDir() . '/log';
+        return $this->getCacheDir().'/log';
     }
 
     private function fingerprint(): string

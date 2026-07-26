@@ -12,9 +12,12 @@ abstract class BundleTestCase extends KernelTestCase
     /** @param array<string, mixed> $options */
     protected static function createKernel(array $options = []): KernelInterface
     {
+        /** @var array<string, mixed> $profilerConfig */
         $profilerConfig = $options['profiler'] ?? [];
-        \assert(\is_array($profilerConfig));
 
-        return new TestKernel($profilerConfig, $options['routes'] ?? true);
+        $importRoutes = $options['routes'] ?? true;
+        \assert(\is_bool($importRoutes));
+
+        return new TestKernel($profilerConfig, $importRoutes);
     }
 }

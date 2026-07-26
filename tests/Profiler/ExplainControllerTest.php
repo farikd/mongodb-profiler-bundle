@@ -23,10 +23,13 @@ final class ExplainControllerTest extends WebTestCase
     /** @param array<string, mixed> $options */
     protected static function createKernel(array $options = []): KernelInterface
     {
+        /** @var array<string, mixed> $profilerConfig */
         $profilerConfig = $options['profiler'] ?? [];
-        \assert(\is_array($profilerConfig));
 
-        return new TestKernel($profilerConfig, $options['routes'] ?? true);
+        $importRoutes = $options['routes'] ?? true;
+        \assert(\is_bool($importRoutes));
+
+        return new TestKernel($profilerConfig, $importRoutes);
     }
 
     public function testExplainRendersIndexPlanForStoredFind(): void
@@ -34,13 +37,13 @@ final class ExplainControllerTest extends WebTestCase
         $client = $this->createExplainClient();
         $token = $this->probeAndGetToken($client);
 
-        $client->request('POST', '/_mongodb-profiler/explain/' . $token . '/0');
+        $client->request('POST', '/_mongodb-profiler/explain/'.$token.'/0');
 
         self::assertResponseIsSuccessful();
         $body = (string) $client->getResponse()->getContent();
         self::assertTrue(
             str_contains($body, 'IXSCAN') || str_contains($body, 'COLLSCAN'),
-            'expected the explain fragment to report a scan type, got: ' . $body,
+            'expected the explain fragment to report a scan type, got: '.$body,
         );
     }
 
@@ -50,7 +53,7 @@ final class ExplainControllerTest extends WebTestCase
         $token = $this->probeAndGetToken($client);
 
         // Index 1 is the probe's recorded `insertOne` — not explainable.
-        $client->request('POST', '/_mongodb-profiler/explain/' . $token . '/1');
+        $client->request('POST', '/_mongodb-profiler/explain/'.$token.'/1');
 
         self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
         self::assertStringContainsString('not an explainable', (string) $client->getResponse()->getContent());
@@ -61,7 +64,7 @@ final class ExplainControllerTest extends WebTestCase
         $client = $this->createExplainClient();
         $token = $this->probeAndGetToken($client);
 
-        $client->request('POST', '/_mongodb-profiler/explain/' . $token . '/99');
+        $client->request('POST', '/_mongodb-profiler/explain/'.$token.'/99');
 
         self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }

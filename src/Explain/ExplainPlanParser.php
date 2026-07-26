@@ -53,7 +53,7 @@ final class ExplainPlanParser
             }
 
             // Collection scan: classic COLLSCAN, or the SBE engine's lowercase `scan`.
-            if ($upper === 'COLLSCAN' || $upper === 'SCAN') {
+            if ('COLLSCAN' === $upper || 'SCAN' === $upper) {
                 $hasCollscan = true;
             }
         }
@@ -81,6 +81,7 @@ final class ExplainPlanParser
      * Every value found at $key anywhere in the tree (depth-first).
      *
      * @param array<array-key, mixed> $node
+     *
      * @return list<mixed>
      */
     private function collect(array $node, string $key): array
@@ -118,7 +119,7 @@ final class ExplainPlanParser
         foreach ($node as $value) {
             if (\is_array($value)) {
                 $nested = $this->firstValue($value, $key);
-                if ($nested !== null) {
+                if (null !== $nested) {
                     return $nested;
                 }
             }

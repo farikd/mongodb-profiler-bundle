@@ -8,7 +8,6 @@ use MongoDB\Driver\Monitoring\CommandFailedEvent;
 use MongoDB\Driver\Monitoring\CommandStartedEvent;
 use MongoDB\Driver\Monitoring\CommandSubscriber;
 use MongoDB\Driver\Monitoring\CommandSucceededEvent;
-use Override;
 use Symfony\Contracts\Service\ResetInterface;
 
 /**
@@ -54,7 +53,7 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
 
     /**
      * Read commands we re-run with `explain`. (An `aggregate` can technically write via
-     * `$out`/`$merge`, but `explain` never materialises them.)
+     * `$out`/`$merge`, but `explain` never materialises them.).
      */
     public const array EXPLAINABLE_COMMANDS = ['find', 'aggregate', 'count'];
 
@@ -89,10 +88,10 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
     private ?string $firstDropReason = null;
 
     /**
-     * @param list<string> $ignoredCommands       replaces DEFAULT_IGNORED_COMMANDS wholesale
-     * @param list<string> $ignoredTracePrefixes  extra class-name prefixes to skip when
-     *                                            picking the origin frame, on top of this
-     *                                            package's own namespace and `MongoDB\`
+     * @param list<string> $ignoredCommands      replaces DEFAULT_IGNORED_COMMANDS wholesale
+     * @param list<string> $ignoredTracePrefixes extra class-name prefixes to skip when
+     *                                           picking the origin frame, on top of this
+     *                                           package's own namespace and `MongoDB\`
      */
     public function __construct(
         bool $cliProfilingEnabled = false,
@@ -103,8 +102,8 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
         // The web (non-CLI) path records unconditionally; CLI opts in explicitly so
         // ordinary crons and consumers pay nothing.
         $this->enabled = \PHP_SAPI !== 'cli' || $cliProfilingEnabled;
-        $this->ignoredCommands = array_values($ignoredCommands);
-        $this->ignoredTracePrefixes = array_values($ignoredTracePrefixes);
+        $this->ignoredCommands = $ignoredCommands;
+        $this->ignoredTracePrefixes = $ignoredTracePrefixes;
     }
 
     public static function isExplainable(string $commandName): bool
@@ -112,7 +111,7 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
         return \in_array($commandName, self::EXPLAINABLE_COMMANDS, true);
     }
 
-    #[Override]
+    #[\Override]
     public function commandStarted(CommandStartedEvent $event): void
     {
         try {
@@ -122,13 +121,13 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
         }
     }
 
-    #[Override]
+    #[\Override]
     public function commandSucceeded(CommandSucceededEvent $event): void
     {
         $this->finish($event->getRequestId(), $event->getDurationMicros() / 1000, null);
     }
 
-    #[Override]
+    #[\Override]
     public function commandFailed(CommandFailedEvent $event): void
     {
         $this->finish($event->getRequestId(), $event->getDurationMicros() / 1000, $event->getError()->getMessage());
@@ -155,6 +154,7 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
      * and frame-array-driven so the parsing is unit-testable without a live stack.
      *
      * @param list<array<string, mixed>> $frames
+     *
      * @return Trace
      */
     public function parseTrace(array $frames): array
@@ -177,7 +177,7 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
                 'line' => \is_int($frame['line'] ?? null) ? $frame['line'] : 0,
             ];
 
-            if ($found === 0) {
+            if (0 === $found) {
                 $repository = $entry;
                 ++$found;
             } else {
@@ -277,7 +277,7 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
      * outlives a request: without this a worker-mode runtime (FrankenPHP/RoadRunner) would
      * show request N's panel containing requests 1..N.
      */
-    #[Override]
+    #[\Override]
     public function reset(): void
     {
         $this->pending = [];
@@ -351,7 +351,7 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
      */
     private function isIgnoredFrame(string $class): bool
     {
-        if ($class === '') {
+        if ('' === $class) {
             return false;
         }
 
@@ -378,7 +378,7 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
     private function drop(\Throwable $exception): void
     {
         ++$this->droppedCount;
-        $this->firstDropReason ??= $exception::class . ': ' . $exception->getMessage();
+        $this->firstDropReason ??= $exception::class.': '.$exception->getMessage();
     }
 
     private function finish(int|string $requestId, float $durationMs, ?string $error): void
@@ -402,6 +402,6 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
 
     private function signature(string $commandName, string $collection, mixed $filter): string
     {
-        return md5($commandName . '|' . $collection . '|' . serialize($filter));
+        return md5($commandName.'|'.$collection.'|'.serialize($filter));
     }
 }

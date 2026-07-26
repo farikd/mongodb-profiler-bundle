@@ -36,7 +36,7 @@ final class ExplainController extends AbstractController
         $profile = $this->profiler->loadProfile($token);
         // The profiler keys collectors by getName(), which AbstractDataCollector
         // defaults to the FQCN — and that must match the template-registry id.
-        if ($profile === null || !$profile->hasCollector(MongoDataCollector::class)) {
+        if (null === $profile || !$profile->hasCollector(MongoDataCollector::class)) {
             throw new NotFoundHttpException('Unknown profiler token.');
         }
 
@@ -46,12 +46,12 @@ final class ExplainController extends AbstractController
         }
 
         $query = $collector->getRawQuery($index);
-        if ($query === null) {
+        if (null === $query) {
             throw new NotFoundHttpException('Unknown query index.');
         }
 
         if (!ProfilerSubscriber::isExplainable($query['commandName'])) {
-            return $this->fragment(['error' => sprintf('"%s" is not an explainable read command.', $query['commandName'])], Response::HTTP_BAD_REQUEST);
+            return $this->fragment(['error' => \sprintf('"%s" is not an explainable read command.', $query['commandName'])], Response::HTTP_BAD_REQUEST);
         }
 
         try {

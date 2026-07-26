@@ -13,6 +13,7 @@ final class ProfileSummary
 {
     /**
      * @param list<array{commandName: string, collection: string, durationMs: float, ...}> $queries
+     *
      * @return list<array{operation: string, collection: string, count: int, totalMs: float}>
      */
     public function group(array $queries): array
@@ -20,7 +21,7 @@ final class ProfileSummary
         $rows = [];
 
         foreach ($queries as $query) {
-            $key = $query['commandName'] . "\0" . $query['collection'];
+            $key = $query['commandName']."\0".$query['collection'];
 
             if (!isset($rows[$key])) {
                 $rows[$key] = [

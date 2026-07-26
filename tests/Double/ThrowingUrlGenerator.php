@@ -24,6 +24,7 @@ final class ThrowingUrlGenerator implements UrlGeneratorInterface
         $this->context = new RequestContext();
     }
 
+    /** @param array<string, mixed> $parameters */
     public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         throw new RouteNotFoundException(\sprintf('Route not found: "%s".', $name));

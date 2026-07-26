@@ -28,7 +28,7 @@ final readonly class ProfileConsoleListener
 
     public function __invoke(ConsoleTerminateEvent $event): void
     {
-        if ($this->subscriber->getQueryCount() === 0) {
+        if (0 === $this->subscriber->getQueryCount()) {
             return;
         }
 
@@ -36,7 +36,7 @@ final readonly class ProfileConsoleListener
 
         $io->newLine();
         $io->section('MongoDB profile');
-        $io->writeln(sprintf(
+        $io->writeln(\sprintf(
             '<info>%d</info> command(s) in <info>%0.2f</info> ms',
             $this->subscriber->getQueryCount(),
             $this->subscriber->getTotalTimeMs(),
@@ -48,11 +48,11 @@ final readonly class ProfileConsoleListener
                 $row['operation'],
                 $row['collection'],
                 (string) $row['count'],
-                sprintf('%0.2f', $row['totalMs']),
+                \sprintf('%0.2f', $row['totalMs']),
             ];
         }
 
-        if ($rows !== []) {
+        if ([] !== $rows) {
             $io->table(['op', 'collection', 'count', 'total ms'], $rows);
         }
 
@@ -60,12 +60,12 @@ final readonly class ProfileConsoleListener
         // captured the error too and must not silently drop it.
         $errors = array_values(array_filter(
             $this->subscriber->getQueries(),
-            static fn (array $query): bool => $query['error'] !== null,
+            static fn (array $query): bool => null !== $query['error'],
         ));
-        if ($errors !== []) {
-            $io->warning(sprintf('%d command(s) failed:', \count($errors)));
+        if ([] !== $errors) {
+            $io->warning(\sprintf('%d command(s) failed:', \count($errors)));
             foreach ($errors as $query) {
-                $io->writeln(sprintf(
+                $io->writeln(\sprintf(
                     '  <fg=red>%s %s</> — %s',
                     $query['commandName'],
                     $query['collection'],
@@ -76,10 +76,10 @@ final readonly class ProfileConsoleListener
         }
 
         $duplicateGroups = $this->subscriber->getDuplicateGroups();
-        if ($duplicateGroups !== []) {
-            $io->warning(sprintf('%d duplicate/N+1 group(s) detected:', \count($duplicateGroups)));
+        if ([] !== $duplicateGroups) {
+            $io->warning(\sprintf('%d duplicate/N+1 group(s) detected:', \count($duplicateGroups)));
             foreach ($duplicateGroups as $group) {
-                $io->writeln(sprintf(
+                $io->writeln(\sprintf(
                     '  <comment>%d×</comment> %s %s <fg=gray>(%s:%d)</>',
                     $group['count'],
                     $group['commandName'],
@@ -92,7 +92,7 @@ final readonly class ProfileConsoleListener
         }
 
         if ($this->subscriber->getDroppedCount() > 0) {
-            $io->warning(sprintf(
+            $io->warning(\sprintf(
                 '%d command(s) were not recorded: %s',
                 $this->subscriber->getDroppedCount(),
                 (string) $this->subscriber->getFirstDropReason(),
@@ -100,7 +100,7 @@ final readonly class ProfileConsoleListener
         }
 
         if ($this->subscriber->isCapped()) {
-            $io->warning(sprintf(
+            $io->warning(\sprintf(
                 'Query cap reached: only the first %d commands were stored individually (totals and duplicate counts above are exact). Raise mongodb_profiler.max_queries to store more.',
                 $this->subscriber->getMaxQueries(),
             ));

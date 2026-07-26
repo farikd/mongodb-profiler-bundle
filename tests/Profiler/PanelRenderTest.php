@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Farikd\MongodbProfilerBundle\Tests\Profiler;
 
+use Farikd\MongodbProfilerBundle\Monitoring\ProfilerSubscriber;
 use Farikd\MongodbProfilerBundle\Profiler\MongoDataCollector;
 use Farikd\MongodbProfilerBundle\Tests\Fixtures\BundleTestCase;
 use Farikd\MongodbProfilerBundle\Twig\ExplainUrlExtension;
@@ -77,6 +78,8 @@ final class PanelRenderTest extends BundleTestCase
     private function renderPanel(): string
     {
         $subscriber = self::getContainer()->get('mongodb_profiler.subscriber');
+        self::assertInstanceOf(ProfilerSubscriber::class, $subscriber);
+
         $frame = ['name' => 'Repo.php', 'file' => '/app/Repo.php', 'line' => 1];
         $subscriber->recordCommand([
             'commandName' => 'find',

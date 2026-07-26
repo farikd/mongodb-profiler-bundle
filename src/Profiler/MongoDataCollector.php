@@ -10,7 +10,6 @@ use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
-use Throwable;
 
 /**
  * Web-profiler surface over {@see ProfilerSubscriber}. Collects late (so every
@@ -30,13 +29,13 @@ final class MongoDataCollector extends AbstractDataCollector implements LateData
     {
     }
 
-    #[Override]
-    public function collect(Request $request, Response $response, ?Throwable $exception = null): void
+    #[\Override]
+    public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
     {
         // Nothing here — all commands are gathered in lateCollect().
     }
 
-    #[Override]
+    #[\Override]
     public function lateCollect(): void
     {
         $formatter = new FilterFormatter();
@@ -48,7 +47,7 @@ final class MongoDataCollector extends AbstractDataCollector implements LateData
                 'collection' => $query['collection'],
                 // Readable JSON, not cloneVar: the profiler's shared dumper cuts nested
                 // filter/pipeline args server-side (see FilterFormatter).
-                'filterJson' => $query['filter'] === null ? null : $formatter->toReadable($query['filter']),
+                'filterJson' => null === $query['filter'] ? null : $formatter->toReadable($query['filter']),
                 'rawFilter' => $query['filter'],
                 'durationMs' => $query['durationMs'],
                 'error' => $query['error'],
@@ -81,8 +80,8 @@ final class MongoDataCollector extends AbstractDataCollector implements LateData
         ];
     }
 
-    #[Override]
-    public static function getTemplate(): ?string
+    #[\Override]
+    public static function getTemplate(): string
     {
         return '@MongodbProfiler/mongodb.html.twig';
     }
@@ -112,16 +111,30 @@ final class MongoDataCollector extends AbstractDataCollector implements LateData
     public function getQueries(): array
     {
         $queries = $this->data['queries'] ?? [];
+        if (!\is_array($queries)) {
+            return [];
+        }
 
-        return \is_array($queries) ? array_values($queries) : [];
+        // Written exclusively by lateCollect() above, always in this shape.
+        /** @var list<array<string, mixed>> $queries */
+        $queries = $queries;
+
+        return $queries;
     }
 
     /** @return list<array<string, mixed>> */
     public function getDuplicateGroups(): array
     {
         $groups = $this->data['duplicateGroups'] ?? [];
+        if (!\is_array($groups)) {
+            return [];
+        }
 
-        return \is_array($groups) ? array_values($groups) : [];
+        // Written exclusively by lateCollect() above, always in this shape.
+        /** @var list<array<string, mixed>> $groups */
+        $groups = $groups;
+
+        return $groups;
     }
 
     public function getDuplicateGroupCount(): int

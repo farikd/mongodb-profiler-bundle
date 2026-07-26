@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Farikd\MongodbProfilerBundle\Tests\Explain;
 
 use Farikd\MongodbProfilerBundle\Explain\ExplainCommandBuilder;
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 
 final class ExplainCommandBuilderTest extends TestCase
 {
@@ -35,22 +33,22 @@ final class ExplainCommandBuilderTest extends TestCase
 
         self::assertSame('videos', $command['explain']['aggregate']);
         self::assertSame($pipeline, $command['explain']['pipeline']);
-        self::assertInstanceOf(stdClass::class, $command['explain']['cursor']);
+        self::assertInstanceOf(\stdClass::class, $command['explain']['cursor']);
     }
 
     public function testEmptyOrNullFilterBecomesEmptyDocument(): void
     {
         $command = (new ExplainCommandBuilder())->build('find', 'videos', null);
 
-        self::assertInstanceOf(stdClass::class, $command['explain']['filter']);
+        self::assertInstanceOf(\stdClass::class, $command['explain']['filter']);
 
         $emptyArray = (new ExplainCommandBuilder())->build('find', 'videos', []);
-        self::assertInstanceOf(stdClass::class, $emptyArray['explain']['filter']);
+        self::assertInstanceOf(\stdClass::class, $emptyArray['explain']['filter']);
     }
 
     public function testRejectsNonExplainableCommand(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
 
         (new ExplainCommandBuilder())->build('update', 'videos', ['a' => 1]);
     }

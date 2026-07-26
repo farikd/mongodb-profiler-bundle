@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Farikd\MongodbProfilerBundle\Tests\Explain;
 
-use Farikd\MongodbProfilerBundle\Explain\ExplainResult;
 use Farikd\MongodbProfilerBundle\Explain\ExplainPlanParser;
+use Farikd\MongodbProfilerBundle\Explain\ExplainResult;
 use PHPUnit\Framework\TestCase;
 
 final class ExplainPlanParserTest extends TestCase
@@ -227,7 +227,7 @@ final class ExplainPlanParserTest extends TestCase
                 ],
             ]);
 
-            self::assertTrue($result->usesIndex, sprintf('%s should count as index use', $stage));
+            self::assertTrue($result->usesIndex, \sprintf('%s should count as index use', $stage));
             self::assertSame(ExplainResult::PLAN_IXSCAN, $result->planType);
         }
     }

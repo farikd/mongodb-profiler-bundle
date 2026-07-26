@@ -13,8 +13,6 @@ use MongoDB\BSON\Timestamp;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
-use stdClass;
-use Stringable;
 use Symfony\Bundle\WebProfilerBundle\Twig\WebProfilerExtension;
 
 /**
@@ -43,7 +41,7 @@ final class FilterFormatter
             \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE | \JSON_PARTIAL_OUTPUT_ON_ERROR,
         );
 
-        if ($json === false) {
+        if (false === $json) {
             return '/* unrenderable filter */';
         }
 
@@ -68,11 +66,11 @@ final class FilterFormatter
             $value instanceof Binary => 'Binary(0x'.bin2hex($value->getData()).')',
             $value instanceof BSONArray => array_map($this->normalize(...), $value->getArrayCopy()),
             $value instanceof BSONDocument => $this->normalizeAssoc($value->getArrayCopy()),
-            $value instanceof stdClass => $this->normalizeAssoc((array) $value),
+            $value instanceof \stdClass => $this->normalizeAssoc((array) $value),
             \is_array($value) => array_is_list($value)
                 ? array_map($this->normalize(...), $value)
                 : $this->normalizeAssoc($value),
-            \is_object($value) => $value instanceof Stringable ? (string) $value : '('.$value::class.')',
+            \is_object($value) => $value instanceof \Stringable ? (string) $value : '('.$value::class.')',
             default => $value,
         };
     }
@@ -80,10 +78,10 @@ final class FilterFormatter
     /**
      * @param array<array-key, mixed> $assoc
      */
-    private function normalizeAssoc(array $assoc): stdClass
+    private function normalizeAssoc(array $assoc): \stdClass
     {
         // Keep it an object so json_encode emits `{}` (a document), not `[]`.
-        $out = new stdClass();
+        $out = new \stdClass();
         foreach ($assoc as $key => $value) {
             $out->{(string) $key} = $this->normalize($value);
         }

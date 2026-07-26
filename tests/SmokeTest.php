@@ -22,6 +22,7 @@ final class SmokeTest extends TestCase
         $cursor = $manager->executeCommand('admin', new \MongoDB\Driver\Command(['ping' => 1]));
 
         $reply = $cursor->toArray()[0];
+        \assert($reply instanceof \stdClass);
 
         self::assertSame(1.0, $reply->ok, 'the ping command must report ok: 1');
     }

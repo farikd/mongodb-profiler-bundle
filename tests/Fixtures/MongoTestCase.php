@@ -18,9 +18,9 @@ abstract class MongoTestCase extends TestCase
 
     protected function client(): Client
     {
-        if ($this->client === null) {
+        if (null === $this->client) {
             $uri = getenv('MONGODB_URI');
-            if (!\is_string($uri) || $uri === '') {
+            if (!\is_string($uri) || '' === $uri) {
                 self::markTestSkipped('MONGODB_URI is not set; start the compose stack (task up).');
             }
 
@@ -37,10 +37,10 @@ abstract class MongoTestCase extends TestCase
     protected function database(): Database
     {
         $name = getenv('MONGODB_DATABASE');
-        $name = \is_string($name) && $name !== '' ? $name : 'mongodb_profiler_test';
+        $name = \is_string($name) && '' !== $name ? $name : 'mongodb_profiler_test';
 
         if (!str_ends_with($name, '_test')) {
-            self::fail(sprintf('Refusing to run against non-test database "%s".', $name));
+            self::fail(\sprintf('Refusing to run against non-test database "%s".', $name));
         }
 
         return $this->client()->selectDatabase($name);

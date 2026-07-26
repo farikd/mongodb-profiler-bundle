@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require \dirname(__DIR__) . '/vendor/autoload.php';
+require \dirname(__DIR__).'/vendor/autoload.php';
 
 /*
  * PHPUnit snapshots the process' exception-handler stack around every single test and flags
@@ -25,4 +25,4 @@ require \dirname(__DIR__) . '/vendor/autoload.php';
  * none of which this fix needs or wants in a package whose whole point is deprecation-sensitive
  * framework integration.
  */
-\Symfony\Component\ErrorHandler\ErrorHandler::register();
+Symfony\Component\ErrorHandler\ErrorHandler::register();
