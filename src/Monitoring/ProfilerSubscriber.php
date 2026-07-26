@@ -53,7 +53,7 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
 
     /**
      * Read commands we re-run with `explain`. (An `aggregate` can technically write via
-     * `$out`/`$merge`, but `explain` never materialises them.).
+     * `$out`/`$merge`, but `explain` never materialises them).
      */
     public const array EXPLAINABLE_COMMANDS = ['find', 'aggregate', 'count'];
 
