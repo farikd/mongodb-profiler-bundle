@@ -6,6 +6,7 @@ namespace Farikd\MongodbProfilerBundle\Tests\Profiler;
 
 use Farikd\MongodbProfilerBundle\Profiler\MongoDataCollector;
 use Farikd\MongodbProfilerBundle\Tests\Fixtures\BundleTestCase;
+use Farikd\MongodbProfilerBundle\Twig\ExplainUrlExtension;
 use Twig\Environment;
 
 /**
@@ -46,6 +47,31 @@ final class PanelRenderTest extends BundleTestCase
         $html = $this->renderPanel();
 
         self::assertStringContainsString(self::EXPLAIN_BUTTON_MARKER, $html);
+    }
+
+    /**
+     * The one case {@see ExplainUrlExtension::explainUrl()}'s try/catch exists for: explain
+     * IS configured (so `explainConfigured` is true and the short-circuit at the top of
+     * `explainUrl()` is bypassed), but the routes import was skipped, so
+     * `UrlGeneratorInterface::generate()` throws `RouteNotFoundException` and must be caught
+     * rather than propagate through panel rendering.
+     */
+    public function testPanelRendersWithoutTheExplainButtonWhenRouteIsMissingButExplainIsConfigured(): void
+    {
+        $uri = getenv('MONGODB_URI');
+        self::assertIsString($uri);
+
+        self::bootKernel(['profiler' => [
+            'cli' => true,
+            'explain' => ['uri' => $uri, 'database' => 'mongodb_profiler_test'],
+        ], 'routes' => false]);
+
+        self::assertTrue(self::getContainer()->has('mongodb_profiler.explain_runner'));
+
+        $html = $this->renderPanel();
+
+        self::assertStringContainsString('MongoDB', $html);
+        self::assertStringNotContainsString(self::EXPLAIN_BUTTON_MARKER, $html);
     }
 
     private function renderPanel(): string
