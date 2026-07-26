@@ -80,7 +80,8 @@ final class MongodbProfilerBundle extends AbstractBundle
             ->set('mongodb_profiler.ignored_commands', $config['ignored_commands'])
             ->set('mongodb_profiler.ignored_trace_prefixes', $config['ignored_trace_prefixes'])
             ->set('mongodb_profiler.explain_uri', $config['explain']['uri'])
-            ->set('mongodb_profiler.explain_database', $config['explain']['database']);
+            ->set('mongodb_profiler.explain_database', $config['explain']['database'])
+            ->set('mongodb_profiler.explain_configured', \is_string($config['explain']['uri']) && \is_string($config['explain']['database']));
 
         $container->import('../config/services.php');
 

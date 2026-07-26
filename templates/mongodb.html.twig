@@ -1,0 +1,231 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set icon %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+        <span class="sf-toolbar-value">{{ collector.queryCount }}</span>
+        <span class="sf-toolbar-info-piece-additional-detail">
+            <span class="sf-toolbar-label">in</span>
+            <span class="sf-toolbar-value">{{ '%0.2f'|format(collector.totalTimeMs) }}</span>
+            <span class="sf-toolbar-label">ms</span>
+        </span>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>Mongo commands</b>
+            <span class="sf-toolbar-status{{ collector.duplicateGroupCount > 0 ? ' sf-toolbar-status-yellow' }}">{{ collector.queryCount }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Query time</b>
+            <span>{{ '%0.2f'|format(collector.totalTimeMs) }} ms</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Duplicate groups</b>
+            <span class="sf-toolbar-status{{ collector.duplicateGroupCount > 0 ? ' sf-toolbar-status-yellow' }}">{{ collector.duplicateGroupCount }}</span>
+        </div>
+        {% if collector.capped %}
+            <div class="sf-toolbar-info-piece">
+                <b>Stored</b>
+                <span>{{ collector.storedCount }} of {{ collector.queryCount }} (capped)</span>
+            </div>
+        {% endif %}
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: profiler_url }) }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label {{ collector.queryCount == 0 ? 'disabled' }}">
+        <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg></span>
+        <strong>MongoDB</strong>
+        <span class="count">
+            <span>{{ collector.queryCount }}</span>
+        </span>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    {% import _self as helper %}
+    <style>
+        pre.mongo-filter {
+            margin: 0;
+            padding: 0;
+            background: none;
+            border: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: var(--font-mono, ui-monospace, monospace);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+    </style>
+    <h2>MongoDB Queries</h2>
+
+    {% if collector.queryCount == 0 %}
+        <div class="empty empty-panel">
+            <p>No MongoDB queries were executed.</p>
+        </div>
+    {% else %}
+        <div class="metrics">
+            <div class="metric">
+                <span class="value">{{ collector.queryCount }}</span>
+                <span class="label">Commands</span>
+            </div>
+            <div class="metric">
+                <span class="value">{{ '%0.2f'|format(collector.totalTimeMs) }} <span class="unit">ms</span></span>
+                <span class="label">Total time</span>
+            </div>
+            <div class="metric">
+                <span class="value{{ collector.duplicateGroupCount > 0 ? ' status-warning' }}">{{ collector.duplicateGroupCount }}</span>
+                <span class="label">Duplicate groups</span>
+            </div>
+        </div>
+
+        {% if collector.capped %}
+            <div class="card-block" style="border-left: 4px solid var(--color-warning, #b8860b); padding: 8px 12px; margin: 10px 0;">
+                <strong>Query cap reached.</strong> Only the first {{ collector.storedCount }} of {{ collector.queryCount }} commands are listed below
+                (total time and duplicate-group counts above stay exact). Raise <code>MONGO_PROFILER_MAX_QUERIES</code> (currently {{ collector.maxQueries }}) to store more.
+            </div>
+        {% endif %}
+
+        {% if collector.droppedCount > 0 %}
+            <div class="status-warning">
+                {{ collector.droppedCount }} command(s) were not recorded: {{ collector.firstDropReason }}
+            </div>
+        {% endif %}
+
+        {% if collector.duplicateGroups is not empty %}
+            <h2>Duplicate / N+1 groups</h2>
+            <table style="table-layout: fixed; width: 100%;">
+                <colgroup>
+                    <col style="width: 8%;">
+                    <col style="width: 11%;">
+                    <col style="width: 11%;">
+                    <col style="width: 45%;">
+                    <col style="width: 25%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="nowrap">Repeats</th>
+                        <th class="nowrap">Operation</th>
+                        <th class="nowrap">Collection</th>
+                        <th>Filter / Pipeline</th>
+                        <th>Origin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in collector.duplicateGroups %}
+                        <tr style="background: var(--mongo-dup-bg, rgba(184, 134, 11, 0.08));">
+                            <td class="nowrap"><span class="label status-warning">{{ group.count }}&times;</span></td>
+                            <td style="overflow-wrap: anywhere;">{{ group.commandName }}</td>
+                            <td style="overflow-wrap: anywhere;">{{ group.collection }}</td>
+                            <td><pre class="mongo-filter">{{ group.filterJson }}</pre></td>
+                            <td class="text-small" style="overflow-wrap: anywhere;">{{ helper.trace_links(group.trace) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        <h2>Command Log</h2>
+        <table style="table-layout: fixed; width: 100%;">
+            <colgroup>
+                <col style="width: 4%;">
+                <col style="width: 8%;">
+                <col style="width: 10%;">
+                <col style="width: 11%;">
+                <col style="width: 40%;">
+                <col style="width: 27%;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="nowrap">#</th>
+                    <th class="nowrap">Time</th>
+                    <th class="nowrap">Operation</th>
+                    <th class="nowrap">Collection</th>
+                    <th>Filter / Pipeline</th>
+                    <th>Caller &rarr; Repository</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for query in collector.queries %}
+                    <tr{% if query.error %} class="status-error"{% endif %}>
+                        <td class="font-normal text-small text-muted nowrap">{{ loop.index }}</td>
+                        <td class="nowrap">{{ '%0.2f'|format(query.durationMs) }} ms</td>
+                        <td style="overflow-wrap: anywhere;">
+                            {{ query.commandName }}
+                            {% set explain_url = query.explainable ? mongodb_profiler_explain_url(token, loop.index0) : null %}
+                            {% if explain_url %}
+                                <button type="button" class="btn btn-sm mongo-explain-btn"
+                                        data-explain-url="{{ explain_url }}"
+                                        data-target="mongo-explain-{{ loop.index0 }}"
+                                        style="cursor: pointer; display: block; margin-top: 4px;">[explain]</button>
+                            {% endif %}
+                        </td>
+                        <td class="nowrap">{{ query.collection }}</td>
+                        <td>
+                            {% if query.filterJson is not null %}
+                                <pre class="mongo-filter">{{ query.filterJson }}</pre>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                            {% if query.error %}
+                                <div class="text-small text-bold" style="color: var(--color-error);">{{ query.error }}</div>
+                            {% endif %}
+                            <div id="mongo-explain-{{ loop.index0 }}" class="mongo-explain-result text-small" style="margin-top: 4px;"></div>
+                        </td>
+                        <td class="text-small" style="overflow-wrap: anywhere;">{{ helper.trace_links(query.trace) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <p class="text-muted text-small">
+            Cursor iteration (<code>getMore</code>) is not captured, so a large paginated
+            <code>find</code>/<code>aggregate</code> under-reports the time spent streaming its tail.
+        </p>
+
+        <script>
+            document.addEventListener('click', function (event) {
+                var button = event.target.closest('.mongo-explain-btn');
+                if (button === null) {
+                    return;
+                }
+
+                var target = document.getElementById(button.getAttribute('data-target'));
+                if (target === null) {
+                    return;
+                }
+
+                button.disabled = true;
+                target.textContent = 'Explaining…';
+
+                fetch(button.getAttribute('data-explain-url'), {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(function (response) { return response.text(); })
+                    .then(function (html) { target.innerHTML = html; })
+                    .catch(function (error) { target.textContent = 'Explain failed: ' + error; })
+                    .finally(function () { button.disabled = false; });
+            });
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% macro trace_links(trace) %}
+    {% if trace.caller.file or trace.repository.file %}
+        {% if trace.caller.file %}
+            <a href="{{ trace.caller.file|file_link(trace.caller.line) }}" title="{{ trace.caller.file|file_relative }}">{{ trace.caller.name }}:{{ trace.caller.line }}</a>
+        {% endif %}
+        {% if trace.caller.file and trace.repository.file %}
+            &rarr;
+        {% endif %}
+        {% if trace.repository.file %}
+            <a href="{{ trace.repository.file|file_link(trace.repository.line) }}" title="{{ trace.repository.file|file_relative }}">{{ trace.repository.name }}:{{ trace.repository.line }}</a>
+        {% endif %}
+    {% else %}
+        <span class="text-muted">n/a</span>
+    {% endif %}
+{% endmacro %}

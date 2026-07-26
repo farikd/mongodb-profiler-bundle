@@ -38,4 +38,14 @@ final class ConfigurationTest extends BundleTestCase
         self::assertInstanceOf(ProfilerSubscriber::class, $subscriber);
         self::assertSame(7, $subscriber->getMaxQueries());
     }
+
+    public function testExplainServicesAreNotRegisteredWithoutExplainConfig(): void
+    {
+        // `explain.uri`/`explain.database` default to null, so `config/explain.php` must
+        // never be imported — proving the conditional import in loadExtension() actually
+        // guards the container, not only that its condition reads correctly.
+        self::bootKernel();
+
+        self::assertFalse(self::getContainer()->has('mongodb_profiler.explain_runner'));
+    }
 }

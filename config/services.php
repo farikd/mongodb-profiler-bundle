@@ -3,9 +3,13 @@
 declare(strict_types=1);
 
 use Farikd\MongodbProfilerBundle\Monitoring\ProfilerSubscriber;
+use Farikd\MongodbProfilerBundle\Profiler\FilterFormatter;
+use Farikd\MongodbProfilerBundle\Profiler\MongoDataCollector;
+use Farikd\MongodbProfilerBundle\Twig\ExplainUrlExtension;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
@@ -23,4 +27,19 @@ return static function (ContainerConfigurator $container): void {
         ->public();
 
     $services->alias(ProfilerSubscriber::class, 'mongodb_profiler.subscriber')->public();
+
+    $services->set('mongodb_profiler.filter_formatter', FilterFormatter::class);
+
+    $services->set('mongodb_profiler.data_collector', MongoDataCollector::class)
+        ->args([service('mongodb_profiler.subscriber')])
+        ->tag('data_collector', [
+            'template' => '@MongodbProfiler/mongodb.html.twig',
+            'id' => MongoDataCollector::class,
+        ]);
+
+    $services->alias(MongoDataCollector::class, 'mongodb_profiler.data_collector')->public();
+
+    $services->set('mongodb_profiler.twig.explain_url', ExplainUrlExtension::class)
+        ->args([service('router'), param('mongodb_profiler.explain_configured')])
+        ->tag('twig.extension');
 };
