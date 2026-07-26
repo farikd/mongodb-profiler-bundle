@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Farikd\MongodbProfilerBundle\Console\ProfileConsoleListener;
+use Farikd\MongodbProfilerBundle\Console\ProfileSummary;
 use Farikd\MongodbProfilerBundle\Monitoring\ProfilerSubscriber;
 use Farikd\MongodbProfilerBundle\Profiler\FilterFormatter;
 use Farikd\MongodbProfilerBundle\Profiler\MongoDataCollector;
@@ -42,4 +44,10 @@ return static function (ContainerConfigurator $container): void {
     $services->set('mongodb_profiler.twig.explain_url', ExplainUrlExtension::class)
         ->args([service('router'), param('mongodb_profiler.explain_configured')])
         ->tag('twig.extension');
+
+    $services->set('mongodb_profiler.console.summary', ProfileSummary::class);
+
+    $services->set('mongodb_profiler.console.listener', ProfileConsoleListener::class)
+        ->args([service('mongodb_profiler.subscriber'), service('mongodb_profiler.console.summary')])
+        ->tag('kernel.event_listener', ['event' => 'console.terminate']);
 };
