@@ -1,0 +1,26 @@
+version: '3'
+
+vars:
+    PHP: docker compose exec -T -u $(id -u):$(id -g) php
+
+tasks:
+    up:
+        cmds:
+            - docker compose up -d
+            - '{{.PHP}} composer install'
+    down:
+        cmds: [docker compose down -v]
+    shell:
+        interactive: true
+        cmds: [docker compose exec -u $(id -u):$(id -g) php sh]
+    test:
+        desc: Full gate
+        cmds: [task: test:cs, task: test:stan, task: test:phpunit]
+    test:phpunit:
+        cmds: ['{{.PHP}} vendor/bin/phpunit {{.CLI_ARGS}}']
+    test:stan:
+        cmds: ['{{.PHP}} vendor/bin/phpstan analyse']
+    test:cs:
+        cmds: ['{{.PHP}} vendor/bin/php-cs-fixer check --diff']
+    test:cs-fix:
+        cmds: ['{{.PHP}} vendor/bin/php-cs-fixer fix']

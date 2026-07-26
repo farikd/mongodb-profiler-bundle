@@ -1,0 +1,16 @@
+services:
+    php:
+        build: .docker/php
+        volumes:
+            - .:/app
+        environment:
+            MONGODB_URI: mongodb://mongo:27017
+            COMPOSER_HOME: /tmp/composer
+        depends_on:
+            - mongo
+        command: sleep infinity
+
+    mongo:
+        image: mongo:8
+        ulimits:
+            nofile: 64000
