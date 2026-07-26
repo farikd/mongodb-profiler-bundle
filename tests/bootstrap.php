@@ -19,7 +19,10 @@ require \dirname(__DIR__) . '/vendor/autoload.php';
  * Registering it here, once, before PHPUnit's first per-test snapshot, makes every later kernel
  * boot in the suite a no-op re-registration: `ErrorHandler::register()` sees an instance of
  * itself already installed and restores that same instance instead of pushing a new one, so no
- * test observes a net change. This is exactly what `symfony/phpunit-bridge` would otherwise do
- * for us; we don't depend on that whole package just for this.
+ * test observes a net change. Deliberately the bare registration call, not
+ * `Symfony\Component\ErrorHandler\Debug::enable()` — that also reconfigures process-wide
+ * `error_reporting`/`display_errors`/`assert.*` ini settings and installs `DebugClassLoader`,
+ * none of which this fix needs or wants in a package whose whole point is deprecation-sensitive
+ * framework integration.
  */
-\Symfony\Component\ErrorHandler\Debug::enable();
+\Symfony\Component\ErrorHandler\ErrorHandler::register();
