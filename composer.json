@@ -9,24 +9,24 @@
         "php": ">=8.4",
         "ext-mongodb": "*",
         "mongodb/mongodb": "^2.0",
-        "symfony/config": "^7.3 || ^8.0",
-        "symfony/console": "^7.3 || ^8.0",
-        "symfony/dependency-injection": "^7.3 || ^8.0",
-        "symfony/event-dispatcher": "^7.3 || ^8.0",
-        "symfony/framework-bundle": "^7.3 || ^8.0",
-        "symfony/http-foundation": "^7.3 || ^8.0",
-        "symfony/http-kernel": "^7.3 || ^8.0",
-        "symfony/routing": "^7.3 || ^8.0",
-        "symfony/twig-bundle": "^7.3 || ^8.0",
+        "symfony/config": "^7.4 || ^8.0",
+        "symfony/console": "^7.4 || ^8.0",
+        "symfony/dependency-injection": "^7.4 || ^8.0",
+        "symfony/event-dispatcher": "^7.4 || ^8.0",
+        "symfony/framework-bundle": "^7.4 || ^8.0",
+        "symfony/http-foundation": "^7.4 || ^8.0",
+        "symfony/http-kernel": "^7.4 || ^8.0",
+        "symfony/routing": "^7.4 || ^8.0",
+        "symfony/twig-bundle": "^7.4 || ^8.0",
         "twig/twig": "^3.10"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.64",
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^13.0",
-        "symfony/browser-kit": "^7.3 || ^8.0",
-        "symfony/web-profiler-bundle": "^7.3 || ^8.0",
-        "symfony/yaml": "^7.3 || ^8.0"
+        "symfony/browser-kit": "^7.4 || ^8.0",
+        "symfony/web-profiler-bundle": "^7.4 || ^8.0",
+        "symfony/yaml": "^7.4 || ^8.0"
     },
     "suggest": {
         "symfony/web-profiler-bundle": "To render the profiler panel (dev only)"
