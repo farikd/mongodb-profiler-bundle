@@ -3,7 +3,7 @@
     "description": "Dev-only MongoDB query profiler for Symfony: web-profiler panel, on-demand explain, N+1 detection and a CLI summary — for the raw mongodb/mongodb driver.",
     "type": "symfony-bundle",
     "license": "MIT",
-    "keywords": ["symfony", "mongodb", "profiler", "debug", "performance", "n+1"],
+    "keywords": ["symfony", "mongodb", "profiler", "debug", "performance", "n-plus-one"],
     "authors": [{"name": "Dmytro Farafontov"}],
     "require": {
         "php": ">=8.4",

@@ -70,6 +70,10 @@ jobs:
                   php-version: '8.4'
                   extensions: mongodb
                   coverage: none
+            # Packagist rejects a release whose composer.json fails this, and it does so
+            # AFTER the tag is pushed — so it has to be a gate here, not a lesson there.
+            # --no-check-lock because composer.lock is deliberately not committed.
+            - run: composer validate --strict --no-check-lock
             - run: composer update --no-progress
             - run: vendor/bin/phpstan analyse --no-progress
             - run: vendor/bin/php-cs-fixer check --diff
