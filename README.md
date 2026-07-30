@@ -24,6 +24,18 @@ It is dev/test tooling only. With `enabled: false` (or outside `kernel.debug`, i
 default), the bundle registers **no services at all** — a production container is
 identical to one without the package installed.
 
+## Requirements
+
+- PHP >= 8.4 with `ext-mongodb`
+- `mongodb/mongodb` ^2.0
+- Symfony ^7.4 || ^8.0
+
+Symfony 7.3 is not supported: it is end-of-life and every 7.3.x release carries unpatched
+security advisories, so Composer's default policy refuses to install it anyway.
+
+`symfony/web-profiler-bundle` is optional — without it everything still works except the
+panel (the CLI summary, in particular, does not need it).
+
 ## Installation
 
 ```bash
@@ -77,8 +89,9 @@ mongodb_profiler:
     ignored_trace_prefixes: []
 
     # Connection used to re-run a captured read with `explain`. Leaving either
-    # unset disables the explain feature (and its controller/route are never
-    # registered).
+    # unset disables the feature: the explain services — including the controller
+    # behind the route below — are never registered, and the panel offers no
+    # Explain button.
     explain:
         uri: null
         database: null

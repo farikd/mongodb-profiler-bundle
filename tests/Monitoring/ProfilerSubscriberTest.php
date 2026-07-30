@@ -45,17 +45,21 @@ final class ProfilerSubscriberTest extends TestCase
     {
         $subscriber = new ProfilerSubscriber(true);
 
+        // Shaped like a real backtrace out of a consuming app: paths match their class
+        // names, and the two frames the profiler must skip (its own, the driver's) sit on
+        // top, with an argument-less frame carrying no `file` mixed in.
         $trace = $subscriber->parseTrace([
-            ['class' => 'Farikd\\MongodbProfilerBundle\\Monitoring\\ProfilerSubscriber', 'file' => '/app/ProfilerSubscriber.php', 'line' => 90],
-            ['class' => 'MongoDB\\Collection', 'file' => '/vendor/mongodb/Collection.php', 'line' => 10],
+            ['class' => 'Farikd\\MongodbProfilerBundle\\Monitoring\\ProfilerSubscriber', 'file' => '/app/vendor/farikd/mongodb-profiler-bundle/src/Monitoring/ProfilerSubscriber.php', 'line' => 90],
+            ['class' => 'MongoDB\\Collection', 'file' => '/app/vendor/mongodb/mongodb/src/Collection.php', 'line' => 10],
             ['function' => 'no_file_frame'],
-            ['class' => 'App\\Infrastructure\\Persistence\\Video\\VideoRepository', 'file' => '/app/VideoRepository.php', 'line' => 116],
-            ['class' => 'App\\Application\\Video\\CountVideos', 'file' => '/app/CountVideos.php', 'line' => 42],
+            ['class' => 'App\\Repository\\VideoRepository', 'file' => '/app/src/Repository/VideoRepository.php', 'line' => 116],
+            ['class' => 'App\\Controller\\VideoController', 'file' => '/app/src/Controller/VideoController.php', 'line' => 42],
         ]);
 
         self::assertSame('VideoRepository.php', $trace['repository']['name']);
+        self::assertSame('/app/src/Repository/VideoRepository.php', $trace['repository']['file']);
         self::assertSame(116, $trace['repository']['line']);
-        self::assertSame('CountVideos.php', $trace['caller']['name']);
+        self::assertSame('VideoController.php', $trace['caller']['name']);
         self::assertSame(42, $trace['caller']['line']);
     }
 
@@ -64,7 +68,7 @@ final class ProfilerSubscriberTest extends TestCase
         $subscriber = new ProfilerSubscriber(true);
 
         $trace = $subscriber->parseTrace([
-            ['class' => 'MongoDB\\Collection', 'file' => '/vendor/mongodb/Collection.php', 'line' => 10],
+            ['class' => 'MongoDB\\Collection', 'file' => '/app/vendor/mongodb/mongodb/src/Collection.php', 'line' => 10],
         ]);
 
         self::assertSame('n/a', $trace['repository']['name']);

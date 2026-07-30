@@ -2,7 +2,10 @@ name: CI
 
 on:
     push:
+        # Tags too: a release is cut by pushing one, and Packagist imports it immediately —
+        # so the tagged tree is exactly what needs a green run, not just the branch it came from.
         branches: [main]
+        tags: ['v*']
     pull_request:
 
 jobs:
@@ -75,5 +78,5 @@ jobs:
             # --no-check-lock because composer.lock is deliberately not committed.
             - run: composer validate --strict --no-check-lock
             - run: composer update --no-progress
-            - run: vendor/bin/phpstan analyse --no-progress
+            - run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
             - run: vendor/bin/php-cs-fixer check --diff

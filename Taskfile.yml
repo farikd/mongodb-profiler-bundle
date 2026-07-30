@@ -19,7 +19,10 @@ tasks:
     test:phpunit:
         cmds: ['{{.PHP}} vendor/bin/phpunit {{.CLI_ARGS}}']
     test:stan:
-        cmds: ['{{.PHP}} vendor/bin/phpstan analyse']
+        # Level max peaks at ~124 MB against the image's 128M memory_limit — 3 MB of
+        # headroom, so whether the gate passes depends on result-cache state rather than on
+        # the code. Pinned high so a new file is a PHPStan error, never an OOM.
+        cmds: ['{{.PHP}} vendor/bin/phpstan analyse --memory-limit=1G']
     test:cs:
         cmds: ['{{.PHP}} vendor/bin/php-cs-fixer check --diff']
     test:cs-fix:

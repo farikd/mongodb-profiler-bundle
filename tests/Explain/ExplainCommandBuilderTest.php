@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Farikd\MongodbProfilerBundle\Tests\Explain;
 
 use Farikd\MongodbProfilerBundle\Explain\ExplainCommandBuilder;
+use Farikd\MongodbProfilerBundle\Monitoring\ProfilerSubscriber;
 use PHPUnit\Framework\TestCase;
 
 final class ExplainCommandBuilderTest extends TestCase
@@ -46,8 +47,30 @@ final class ExplainCommandBuilderTest extends TestCase
         self::assertInstanceOf(\stdClass::class, $emptyArray['explain']['filter']);
     }
 
+    public function testEveryCommandTheProfilerMarksExplainableCanBeBuilt(): void
+    {
+        // Two lists, two owners: ProfilerSubscriber::EXPLAINABLE_COMMANDS decides which rows
+        // get an Explain button, this builder's match decides which shapes it can rebuild.
+        // Add a name to the first and forget the second and the button 500s on the default
+        // arm — a divergence no other test here can see, since each case below names its
+        // command literally.
+        $builder = new ExplainCommandBuilder();
+
+        foreach (ProfilerSubscriber::EXPLAINABLE_COMMANDS as $commandName) {
+            $command = $builder->build($commandName, 'videos', ['a' => 1]);
+
+            self::assertSame(
+                'videos',
+                $command['explain'][$commandName] ?? null,
+                \sprintf('"%s" is offered as explainable, so the builder must know its shape', $commandName),
+            );
+        }
+    }
+
     public function testRejectsNonExplainableCommand(): void
     {
+        self::assertNotContains('update', ProfilerSubscriber::EXPLAINABLE_COMMANDS);
+
         $this->expectException(\InvalidArgumentException::class);
 
         (new ExplainCommandBuilder())->build('update', 'videos', ['a' => 1]);

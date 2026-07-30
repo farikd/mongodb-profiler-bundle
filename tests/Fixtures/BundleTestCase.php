@@ -18,6 +18,9 @@ abstract class BundleTestCase extends KernelTestCase
         $importRoutes = $options['routes'] ?? true;
         \assert(\is_bool($importRoutes));
 
-        return new TestKernel($profilerConfig, $importRoutes);
+        $debug = $options['debug'] ?? true;
+        \assert(\is_bool($debug));
+
+        return new TestKernel($profilerConfig, $importRoutes, $debug);
     }
 }

@@ -35,11 +35,11 @@ return static function (ContainerConfigurator $container): void {
     // false on the raw container, which is why renderView() 500'd claiming Twig is
     // unavailable. controller.service_arguments is what AbstractController gets
     // autoconfigured with in a consuming app; added explicitly here since this container
-    // isn't autoconfigured.
+    // isn't autoconfigured — and it is also what makes the service public, so no explicit
+    // ->public() is needed here (RegisterControllerArgumentLocatorsPass::process()).
     $services->set('mongodb_profiler.explain_controller', ExplainController::class)
         ->args([service('profiler'), service('mongodb_profiler.explain_runner')])
         ->autowire()
         ->tag('controller.service_arguments')
-        ->tag('container.service_subscriber')
-        ->public();
+        ->tag('container.service_subscriber');
 };

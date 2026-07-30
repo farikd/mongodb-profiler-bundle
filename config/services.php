@@ -39,6 +39,9 @@ return static function (ContainerConfigurator $container): void {
             'id' => MongoDataCollector::class,
         ]);
 
+    // Public on purpose, though nothing in this package fetches it: it is the handle a
+    // consuming app's functional test uses to assert on captured queries, and a private
+    // alias is unreachable outside a test container.
     $services->alias(MongoDataCollector::class, 'mongodb_profiler.data_collector')->public();
 
     $services->set('mongodb_profiler.twig.explain_url', ExplainUrlExtension::class)

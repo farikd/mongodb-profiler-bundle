@@ -13,14 +13,13 @@ use MongoDB\BSON\Timestamp;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
-use Symfony\Bundle\WebProfilerBundle\Twig\WebProfilerExtension;
 
 /**
  * Renders a captured Mongo filter/pipeline as readable, pretty-printed JSON for the
  * profiler panel — the "show the query" presentation a query profiler wants (like
  * Doctrine surfacing the SQL).
  *
- * Why not {@see WebProfilerExtension::dumpData}
+ * Why not `Symfony\Bundle\WebProfilerBundle\Twig\WebProfilerExtension::dumpData()`
  * (`profiler_dump`): its `maxDepth` argument only drives the *client-side* auto-expand;
  * the profiler's shared `HtmlDumper` cuts the tree server-side around depth two, so the
  * `$match`/`$group` arguments never reach the HTML and no depth argument can bring them

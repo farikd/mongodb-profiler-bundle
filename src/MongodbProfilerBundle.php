@@ -85,6 +85,11 @@ final class MongodbProfilerBundle extends AbstractBundle
             return;
         }
 
+        // One predicate, two consumers: the panel asks it (via the parameter) whether to offer
+        // an Explain button, and the import below decides whether the services behind that
+        // button exist at all. Computing it twice is how a button that 404s gets shipped.
+        $explainConfigured = \is_string($config['explain']['uri']) && \is_string($config['explain']['database']);
+
         $container->parameters()
             ->set('mongodb_profiler.cli', $config['cli'])
             ->set('mongodb_profiler.max_queries', $config['max_queries'])
@@ -92,11 +97,11 @@ final class MongodbProfilerBundle extends AbstractBundle
             ->set('mongodb_profiler.ignored_trace_prefixes', $config['ignored_trace_prefixes'])
             ->set('mongodb_profiler.explain_uri', $config['explain']['uri'])
             ->set('mongodb_profiler.explain_database', $config['explain']['database'])
-            ->set('mongodb_profiler.explain_configured', \is_string($config['explain']['uri']) && \is_string($config['explain']['database']));
+            ->set('mongodb_profiler.explain_configured', $explainConfigured);
 
         $container->import('../config/services.php');
 
-        if (\is_string($config['explain']['uri']) && \is_string($config['explain']['database'])) {
+        if ($explainConfigured) {
             $container->import('../config/explain.php');
         }
     }

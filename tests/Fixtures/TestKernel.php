@@ -30,8 +30,9 @@ final class TestKernel extends Kernel
     public function __construct(
         private readonly array $profilerConfig = [],
         private readonly bool $importRoutes = true,
+        bool $debug = true,
     ) {
-        parent::__construct('test', true);
+        parent::__construct('test', $debug);
     }
 
     /** @return iterable<BundleInterface> */
@@ -96,6 +97,8 @@ final class TestKernel extends Kernel
 
     private function fingerprint(): string
     {
-        return md5(serialize([$this->profilerConfig, $this->importRoutes]));
+        // `debug` belongs here as much as the config does: it decides whether the profiler
+        // registers at all, so two kernels differing only in it must not share a container.
+        return md5(serialize([$this->profilerConfig, $this->importRoutes, $this->debug]));
     }
 }

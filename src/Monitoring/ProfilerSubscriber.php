@@ -121,16 +121,31 @@ final class ProfilerSubscriber implements CommandSubscriber, ResetInterface
         }
     }
 
+    /**
+     * The guard wraps the whole method rather than living inside `finish()`: the event
+     * accessors (`getDurationMicros()`, and `getError()->getMessage()` below) run as
+     * *arguments*, before the callee is entered, so a guard one frame down would not cover
+     * them — and every one of these three entry points is called from inside the
+     * application's own query. Same reasoning as `commandStarted()`/`recordCommand()`.
+     */
     #[\Override]
     public function commandSucceeded(CommandSucceededEvent $event): void
     {
-        $this->finish($event->getRequestId(), $event->getDurationMicros() / 1000, null);
+        try {
+            $this->finish($event->getRequestId(), $event->getDurationMicros() / 1000, null);
+        } catch (\Throwable $exception) {
+            $this->drop($exception);
+        }
     }
 
     #[\Override]
     public function commandFailed(CommandFailedEvent $event): void
     {
-        $this->finish($event->getRequestId(), $event->getDurationMicros() / 1000, $event->getError()->getMessage());
+        try {
+            $this->finish($event->getRequestId(), $event->getDurationMicros() / 1000, $event->getError()->getMessage());
+        } catch (\Throwable $exception) {
+            $this->drop($exception);
+        }
     }
 
     /**

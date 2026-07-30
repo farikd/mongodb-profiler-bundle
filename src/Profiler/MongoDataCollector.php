@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Farikd\MongodbProfilerBundle\Profiler;
 
 use Farikd\MongodbProfilerBundle\Monitoring\ProfilerSubscriber;
-use Override;
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,11 +16,14 @@ use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
  * display copy for the panel, and a plain re-runnable raw copy for on-demand explain
  * (the explain controller reads it back from the stored profile).
  *
- * Do not override {@see AbstractDataCollector::getName()}: `ProfilerPass` keys the
- * `data_collector.templates` registry by service *id* (the FQCN, per the `data_collector`
- * tag's `id`), while the web profiler looks a collector's template up by `getName()`.
- * Overriding it to something friendly makes the two disagree — the collector still
- * collects, but the panel silently does not render and `?panel=…` 404s.
+ * Do not override {@see AbstractDataCollector::getName()}. The profiler indexes collectors
+ * by `getName()` (`Profiler::has()`, `Profile::hasCollector()`), while `TemplateManager`
+ * looks each panel up by the `data_collector` tag's `id` attribute — which is why that tag
+ * passes `id => MongoDataCollector::class`, matching what `AbstractDataCollector::getName()`
+ * returns (`static::class`). Override `getName()` and the two stop agreeing: the collector
+ * still collects, but the panel silently does not render and `?panel=…` 404s. The DI service
+ * id plays no part in this — it only keys `data_collector.templates`, whose keys nothing
+ * reads back.
  */
 final class MongoDataCollector extends AbstractDataCollector implements LateDataCollectorInterface
 {
